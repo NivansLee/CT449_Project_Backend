@@ -47,6 +47,7 @@ exports.findAll = async (req, res, next) => {
     }
 }
 
+
 // Hàm tìm một nhân viên theo MSNV
 exports.findOne = async (req, res, next) => {
     const msnv = req.params.msnv; // Lấy msnv từ URL parameters
@@ -100,6 +101,7 @@ exports.update = async (req, res, next) => {
     }
 };
 
+
 // Hàm xóa một nhân viên
 exports.delete = async (req, res, next) => {
     const { msnv } = req.params;  // Lấy msnv từ URL params
@@ -152,6 +154,7 @@ exports.deleteAll = async (req, res, next) => {
     }
 
 }
+
 
 // Hàm đăng nhập
 exports.login = async (req, res, next) => {

@@ -3,7 +3,6 @@ const express = require("express");
 const staff = require("../controllers/staff.controller");
 
 const router = express.Router();
-// Tạo một router mới để định nghĩa các route (đường dẫn) và các phương thức HTTP tương ứng
 
 router.route("/")
     .get(staff.findAll)
