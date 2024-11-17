@@ -71,33 +71,33 @@ exports.findOne = async (req, res, next) => {
 
 // Hàm cập nhật thông tin nhân viên theo msnv
 exports.update = async (req, res, next) => {
-    const { msnv } = req.params; // Lấy msnv từ URL params
+    const { manxb } = req.params; // Lấy manxb từ URL params
     const updateData = req.body; // Lấy dữ liệu cập nhật từ body request
 
     try {
-        const staffService = new StaffService(MongoDB.client);
+        const producerService = new ProducerService(MongoDB.client);
 
-        // Tìm nhân viên theo msnv trước khi cập nhật
-        const staff = await staffService.findOne(msnv); // Gọi hàm findOne để tìm nhân viên
+        // Tìm nhà xuất bản theo manxb trước khi cập nhật
+        const producer = await producerService.findOne(manxb); // Gọi hàm findOne để tìm nhà xuất bản
 
-        // Nếu không tìm thấy nhân viên, trả về lỗi 404
-        if (!staff) {
+        // Nếu không tìm thấy nhà xuất bản, trả về lỗi 404
+        if (!producer) {
             return res.status(404).send({
-                message: `Staff with msnv ${msnv} not found`
+                message: `Producer with manxb ${manxb} not found`
             });
         }
 
-        // Cập nhật thông tin nhân viên theo msnv
-        const updatedStaff = await staffService.update(msnv, updateData);
+        // Cập nhật thông tin nhà xuất bản theo manxb
+        const updatedProducer = await producerService.update(manxb, updateData);
 
         // Trả về kết quả sau khi cập nhật thành công
         return res.status(200).send({
-            message: "Staff updated successfully",
-            staff: updatedStaff  // Trả về thông tin nhân viên sau khi cập nhật
+            message: "Producer updated successfully",
+            producer: updatedProducer  // Trả về thông tin nhà xuất bản sau khi cập nhật
         });
     } catch (error) {
-        console.error("Error updating staff:", error);
-        return next(new ApiError(500, "An error occurred while updating the staff"));
+        console.error("Error updating producer:", error);
+        return next(new ApiError(500, "An error occurred while updating the producer"));
     }
 };
 

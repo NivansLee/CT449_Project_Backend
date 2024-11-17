@@ -6,6 +6,7 @@ class StaffService {
         this.Staff = client.db().collection("staff");
     }
 
+
     // Hàm tạo mã số nhân viên tự động
     async generateMsnv() {
         try {
@@ -21,6 +22,7 @@ class StaffService {
             throw new ApiError(500, "An error occurred while generating msnv");
         }
     }
+
 
     // Hàm tạo nhân viên mới và kiểm tra số điện thoại, mật khẩu
     async create(payload) {
@@ -66,11 +68,13 @@ class StaffService {
         }
     }
 
+
     // Hàm tìm tất cả nhân viên
     async findAll() {
         const staffList = await this.Staff.find({}).toArray(); // Trả về tất cả nhân viên trong collection
         return staffList;
     }
+
 
     // Hàm xoá 1 nhân viên theo msnv
     async delete(msnv) {
@@ -99,6 +103,7 @@ class StaffService {
         return result;
     }
 
+
     // Hàm tìm một nhân viên theo msnv
     async findOne(msnv) {
         try {
@@ -110,17 +115,47 @@ class StaffService {
         }
     }
 
+
     // Hàm cập nhật thông tin nhân viên
     async update(msnv, updateData) {
         try {
-            // Cập nhật thông tin nhân viên theo msnv
+            // Tìm kiếm nhân viên trước khi kiểm tra số điện thoại hoặc mật khẩu
+            const existingStaff = await this.Staff.findOne({ msnv });
+            if (!existingStaff) {
+                throw new ApiError(404, `Staff with msnv ${msnv} not found`);
+            }
+
+            // Kiểm tra trùng số điện thoại (nếu có yêu cầu cập nhật số điện thoại)
+            if (updateData.sodienthoai) {
+                const existingPhone = await this.Staff.findOne({
+                    sodienthoai: updateData.sodienthoai,
+                    msnv: { $ne: msnv }, // Loại trừ nhân viên hiện tại
+                });
+                if (existingPhone) {
+                    throw new ApiError(400, "Phone number already exists");
+                }
+            }
+
+            // Kiểm tra trùng mật khẩu (nếu có yêu cầu cập nhật mật khẩu)
+            if (updateData.password) {
+                const existingPassword = await this.Staff.findOne({
+                    password: updateData.password,
+                    msnv: { $ne: msnv }, // Loại trừ nhân viên hiện tại
+                });
+                if (existingPassword) {
+                    throw new ApiError(400, "Password already exists");
+                }
+            }
+
+            // Thực hiện cập nhật dữ liệu
             const result = await this.Staff.updateOne(
                 { msnv },
                 { $set: updateData }
             );
 
+            // Nếu không có thay đổi dữ liệu, vẫn trả về nhân viên hiện tại
             if (result.modifiedCount === 0) {
-                return null; // Nếu không có nhân viên nào bị thay đổi
+                return existingStaff; // Trả về thông tin nhân viên hiện tại
             }
 
             // Trả về thông tin nhân viên đã được cập nhật
@@ -128,7 +163,9 @@ class StaffService {
             return updatedStaff;
         } catch (error) {
             console.error("Error updating staff:", error);
-            throw new ApiError(500, "An error occurred while updating the staff");
+            throw error instanceof ApiError
+                ? error
+                : new ApiError(500, "An error occurred while updating the staff");
         }
     }
 
