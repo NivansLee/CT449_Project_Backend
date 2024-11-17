@@ -6,17 +6,18 @@ const router = express.Router();
 // Tạo một router mới để định nghĩa các route (đường dẫn) và các phương thức HTTP tương ứng
 
 router.route("/")
-    .get(staff.findAll) // GET /: Lấy danh sách tất cả các nhân viên
-    .post(staff.create) // POST /: Tạo một nhân viên mới
-    .delete(staff.deleteAll); // DELETE /: Xóa tất cả các nhân viên
+    .get(staff.findAll)
+    .post(staff.create)
+    .delete(staff.deleteAll);
 
-router.route("/:id")
-    .get(staff.findOne) // GET /:id: Lấy thông tin chi tiết của một nhân viên theo ID
-    .put(staff.update) // PUT /:id: Cập nhật thông tin của một nhân viên theo ID
-    .delete(staff.delete); // DELETE /:id: Xóa một nhân viên theo ID
+router.route("/:msnv")
+    .get(staff.findOne)
+    .put(staff.update)
+    .delete(staff.delete);
 
-// router.route("/signin")
-//     .post(staff.signin);
+router.route("/login")
+    .post(staff.login);
+
 
 module.exports = router;
 // Xuất router để có thể sử dụng trong các file khác

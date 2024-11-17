@@ -10,12 +10,10 @@ const ApiError = require("./app/api-errors");
 app.use(cors());
 app.use(express.json());
 
-// Liên kết một nhóm route (các endpoint API) được định nghĩa với đường dẫn cơ sở /api/staff.
 app.use("/api/staff", staffRouter);
 
-// Định nghĩa một route GET cho đường dẫn gốc ('/')
-app.get("/", (req, res) => {
 
+app.get("/", (req, res) => {
     res.json({ message: "Welcome to book management application." });
 });
 
