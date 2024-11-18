@@ -3,16 +3,18 @@ const cors = require("cors"); // Nhập thư viện CORS (Cross-Origin Resource 
 const app = express(); // Tạo một ứng dụng Express.
 
 // Nhập module .route từ tệp .route.js để sử dụng các route liên quan đến
-const staffRouter = require("./app/routes/staff.route");
-const producerRouter = require("./app/routes/producer.route");
+const nhanvienRouter = require("./app/routes/nhanvien.route");
+const nhaxuatbanRouter = require("./app/routes/nhaxuatban.route");
+const docgiaRouter = require("./app/routes/docgia.route");
 const ApiError = require("./app/api-errors");
 
 
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/staff", staffRouter);
-app.use("/api/producer", producerRouter);
+app.use("/api/nhanvien", nhanvienRouter);
+app.use("/api/nhaxuatban", nhaxuatbanRouter);
+app.use("/api/docgia", docgiaRouter);
 
 
 app.get("/", (req, res) => {
