@@ -6,6 +6,7 @@ const app = express(); // Tạo một ứng dụng Express.
 const nhanvienRouter = require("./app/routes/nhanvien.route");
 const nhaxuatbanRouter = require("./app/routes/nhaxuatban.route");
 const docgiaRouter = require("./app/routes/docgia.route");
+const sachRouter = require("./app/routes/sach.route");
 const ApiError = require("./app/api-errors");
 
 
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use("/api/nhanvien", nhanvienRouter);
 app.use("/api/nhaxuatban", nhaxuatbanRouter);
 app.use("/api/docgia", docgiaRouter);
+app.use("/api/sach", sachRouter);
 
 
 app.get("/", (req, res) => {
