@@ -9,28 +9,35 @@ class DocgiaService {
     // Hàm tạo mã độc giả tự động
     async generateMadocgia() {
         try {
-            const lastDocgia = await this.Docgia.find().sort({ madocgia: -1 }).limit(1).toArray();
+            // Lấy tất cả các mã độc giả đã tồn tại
+            const docgiaList = await this.Docgia.find({}).sort({ madocgia: -1 }).toArray();
+            const existingMadocgia = docgiaList.map((docgia) => docgia.madocgia);
 
-            const lastMadocgia = lastDocgia.length > 0 ? lastDocgia[0].madocgia : "DG000";
-            const lastNumber = parseInt(lastMadocgia.replace("DG", ""));
-            const nextNumber = lastNumber + 1;
-            return `DG${nextNumber.toString().padStart(3, "0")}`;
+            // Tìm mã độc giả cần thiết
+            let madocgia = "DG001"; // Mã bắt đầu
+            let nextNumber = 1;
+
+            // Kiểm tra nếu có mã nào bị bỏ trống trong dãy mã độc giả
+            for (let i = 1; i <= existingMadocgia.length; i++) {
+                madocgia = `DG${i.toString().padStart(3, "0")}`;
+                if (!existingMadocgia.includes(madocgia)) {
+                    return madocgia;
+                }
+            }
+
+            // Nếu không có mã nào bị bỏ trống, tạo mã mới
+            return `DG${(nextNumber + 1).toString().padStart(3, "0")}`;
         } catch (error) {
             console.error("Lỗi tạo mã đọc giả:", error);
             throw new ApiError(500, "Có lỗi xảy ra khi tạo mã đọc giả");
         }
     }
 
-    // Hàm tạo độc giả mới và kiểm tra số điện thoại, mật khẩu
+    // Hàm tạo độc giả mới và kiểm tra số điện thoại
     async create(payload) {
         const phoneExists = await this.Docgia.findOne({ dienthoai: payload.dienthoai });
         if (phoneExists) {
             throw new ApiError(400, "Số điện thoại đã tồn tại");
-        }
-
-        const passwordExists = await this.Docgia.findOne({ password: payload.password });
-        if (passwordExists) {
-            throw new ApiError(400, "Mật khẩu đã tồn tại");
         }
 
         try {
@@ -43,7 +50,6 @@ class DocgiaService {
                 phai: payload.phai,
                 diachi: payload.diachi,
                 dienthoai: payload.dienthoai,
-                password: payload.password,
             };
 
             const result = await this.Docgia.insertOne(docgia);
@@ -77,13 +83,11 @@ class DocgiaService {
                 throw new ApiError(404, `Không tìm thấy đọc giả với mã ${madocgia}`);
             }
         } catch (error) {
-            // Xử lý lỗi nếu có
             console.error("Lỗi khi xóa đọc giả:", error);
-            // Chỉ ném lỗi 500 trong trường hợp có lỗi không mong muốn (chứ không phải khi không tìm thấy đọc giả)
             if (error.statusCode !== 404) {
                 throw new ApiError(500, "Đã xảy ra lỗi khi xóa đọc giả");
             }
-            throw error; // Ném lại lỗi nếu là lỗi 404 (không tìm thấy đọc giả)
+            throw error;
         }
     }
 
@@ -128,16 +132,6 @@ class DocgiaService {
                 }
             }
 
-            if (updateData.password) {
-                const existingPassword = await this.Docgia.findOne({
-                    password: updateData.password,
-                    madocgia: { $ne: madocgia },
-                });
-                if (existingPassword) {
-                    throw new ApiError(400, "Mật khẩu đã tồn tại");
-                }
-            }
-
             const result = await this.Docgia.updateOne({ madocgia }, { $set: updateData });
             if (result.modifiedCount === 0) {
                 return existingDocgia;
@@ -151,39 +145,8 @@ class DocgiaService {
                 throw error;
             }
             throw new ApiError(500, "Có lỗi xảy ra khi cập nhật thông tin đọc giả");
-
         }
     }
-
-    // Hàm đăng nhập
-    async login(payload) {
-        const { dienthoai, password } = payload;
-
-        try {
-            // Kiểm tra nếu thiếu thông tin
-            if (!dienthoai || !password) {
-                throw new ApiError(400, "Số điện thoại và mật khẩu là bắt buộc");
-            }
-
-            // Tìm kiếm độc giả theo số điện thoại và mật khẩu
-            const docgia = await this.Docgia.findOne({ dienthoai, password });
-
-            if (!docgia) {
-                throw new ApiError(400, "Số điện thoại hoặc mật khẩu không chính xác");
-            }
-
-            // Xóa mật khẩu trước khi trả về thông tin độc giả
-            const docgiaInfo = { ...docgia };
-            delete docgiaInfo.password;
-
-            return docgiaInfo;
-
-        } catch (error) {
-            console.error("Lỗi khi đăng nhập:", error);
-            throw new ApiError(500, error.message || "Có lỗi xảy ra khi đăng nhập");
-        }
-    }
-
 }
 
 module.exports = DocgiaService;

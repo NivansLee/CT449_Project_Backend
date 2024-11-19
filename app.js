@@ -7,6 +7,8 @@ const nhanvienRouter = require("./app/routes/nhanvien.route");
 const nhaxuatbanRouter = require("./app/routes/nhaxuatban.route");
 const docgiaRouter = require("./app/routes/docgia.route");
 const sachRouter = require("./app/routes/sach.route");
+const muonsachRouter = require("./app/routes/muonsach.route");
+const uploadRouter = require("./app/routes/upload.route.js");
 const ApiError = require("./app/api-errors");
 
 
@@ -17,6 +19,8 @@ app.use("/api/nhanvien", nhanvienRouter);
 app.use("/api/nhaxuatban", nhaxuatbanRouter);
 app.use("/api/docgia", docgiaRouter);
 app.use("/api/sach", sachRouter);
+app.use("/api/muonsach", muonsachRouter);
+app.use("/api/upload", uploadRouter);
 
 
 app.get("/", (req, res) => {

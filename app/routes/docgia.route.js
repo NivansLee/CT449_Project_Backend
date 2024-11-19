@@ -14,9 +14,5 @@ router.route("/:madocgia")
     .put(docgia.update)
     .delete(docgia.delete);
 
-router.route("/login")
-    .post(docgia.login);
-
-
 module.exports = router;
 // Xuất router để có thể sử dụng trong các file khác

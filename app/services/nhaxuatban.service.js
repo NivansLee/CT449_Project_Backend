@@ -6,14 +6,26 @@ class NhaxuatbanService {
         this.Nhaxuatban = client.db().collection("nhaxuatban");
     }
 
-    // Hàm tạo mã nhà xuất bản tự động
+    // Hàm tạo mã nhà xuất bản tự động, kiểm tra mã bị trống (do xóa)
     async generateManxb() {
         try {
-            const lastNhaxuatban = await this.Nhaxuatban.find().sort({ manxb: -1 }).limit(1).toArray();
-            const lastManxb = lastNhaxuatban.length > 0 ? lastNhaxuatban[0].manxb : "NXB000";
-            const lastNumber = parseInt(lastManxb.replace("NXB", ""));
-            const nextNumber = lastNumber + 1;
-            return `NXB${nextNumber.toString().padStart(3, "0")}`;
+            // Lấy danh sách các mã nhà xuất bản, chỉ lấy trường manxb và sắp xếp tăng dần
+            const nhaxuatbanList = await this.Nhaxuatban.find({}, { projection: { manxb: 1 } })
+                .sort({ manxb: 1 })
+                .toArray();
+
+            // Duyệt danh sách mã để tìm mã trống
+            let expectedNumber = 1; // Bắt đầu kiểm tra từ NXB001
+            for (const nhaxuatban of nhaxuatbanList) {
+                const currentNumber = parseInt(nhaxuatban.manxb.replace("NXB", ""));
+                if (currentNumber > expectedNumber) {
+                    return `NXB${expectedNumber.toString().padStart(3, "0")}`;
+                }
+                expectedNumber = currentNumber + 1;
+            }
+
+            // Nếu không tìm thấy mã trống, tạo mã mới kế tiếp
+            return `NXB${expectedNumber.toString().padStart(3, "0")}`;
         } catch (error) {
             console.error("Lỗi khi tạo mã nhà xuất bản:", error);
             throw new ApiError(500, "Đã xảy ra lỗi khi tạo mã nhà xuất bản");
@@ -22,11 +34,13 @@ class NhaxuatbanService {
 
     // Hàm tạo nhà xuất bản mới
     async create(payload) {
+        // Kiểm tra tên nhà xuất bản đã tồn tại chưa
         const nameExists = await this.Nhaxuatban.findOne({ tennxb: payload.tennxb });
         if (nameExists) {
             throw new ApiError(400, "Tên nhà xuất bản đã tồn tại");
         }
 
+        // Tạo mã nhà xuất bản mới
         const manxb = await this.generateManxb();
         const nhaxuatban = {
             manxb,
@@ -60,6 +74,7 @@ class NhaxuatbanService {
     async update(manxb, updateData) {
         const existingNhaxuatban = await this.findOne(manxb);
 
+        // Kiểm tra tên nhà xuất bản có trùng không khi cập nhật
         if (updateData.tennxb) {
             const nameExists = await this.Nhaxuatban.findOne({
                 tennxb: updateData.tennxb,
@@ -70,6 +85,7 @@ class NhaxuatbanService {
             }
         }
 
+        // Cập nhật thông tin nhà xuất bản
         await this.Nhaxuatban.updateOne({ manxb }, { $set: updateData });
         return await this.findOne(manxb);
     }

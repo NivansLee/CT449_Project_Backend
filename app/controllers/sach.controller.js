@@ -21,7 +21,7 @@ exports.create = async (req, res, next) => {
     }
 };
 
-// Hàm lấy danh sách tất cả sách
+// Hàm lấy danh sách tất cả sách chưa bị xóa
 exports.findAll = async (req, res, next) => {
     try {
         const sachService = new SachService(MongoDB.client);
@@ -79,8 +79,7 @@ exports.update = async (req, res, next) => {
     }
 };
 
-
-// Hàm xóa sách (xóa vĩnh viễn)
+// Hàm xóa sách (xóa mềm)
 exports.delete = async (req, res, next) => {
     const masach = req.params.masach;
     if (!masach) {
@@ -91,15 +90,14 @@ exports.delete = async (req, res, next) => {
         const sachService = new SachService(MongoDB.client);
         const deletedBook = await sachService.delete(masach); // Gọi hàm delete từ service
         return res.status(200).send({
-            message: `Xóa sách với mã ${masach} thành công`,
+            message: `Sách với mã ${masach} đã bị xóa mềm thành công`,
         });
     } catch (error) {
         return next(error);
     }
 };
 
-
-// Hàm xóa tất cả sách (xóa vĩnh viễn)
+// Hàm xóa tất cả sách (xóa mềm)
 exports.deleteAll = async (req, res, next) => {
     try {
         const sachService = new SachService(MongoDB.client);

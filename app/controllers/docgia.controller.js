@@ -10,8 +10,7 @@ exports.create = async (req, res, next) => {
         !req.body?.ngaysinh ||
         !req.body?.phai ||
         !req.body?.dienthoai ||
-        !req.body?.diachi ||
-        !req.body?.password
+        !req.body?.diachi
     ) {
         return next(new ApiError(400, "Tất cả các trường thông tin là bắt buộc."));
     }
@@ -100,21 +99,4 @@ exports.deleteAll = async (req, res, next) => {
     }
 };
 
-// Hàm đăng nhập
-exports.login = async (req, res, next) => {
-    if (!req.body?.dienthoai || !req.body?.password) {
-        return next(new ApiError(400, "Số điện thoại và mật khẩu là bắt buộc."));
-    }
 
-    try {
-        const docgiaService = new DocgiaService(MongoDB.client);
-        const docgia = await docgiaService.login(req.body);
-
-        return res.status(200).send({
-            message: "Đăng nhập thành công.",
-            docgia: docgia,  // Trả lại thông tin độc giả (loại bỏ mật khẩu)
-        });
-    } catch (error) {
-        return next(error);
-    }
-};
